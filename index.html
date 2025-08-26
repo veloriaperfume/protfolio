@@ -239,12 +239,13 @@
               <p class="muted">LinkedIn: <a href="#" style="color:var(--accent)">your-linkedin</a></p>
               <p class="muted">GitHub: <a href="#" style="color:var(--accent)">your-github</a></p>
             </div>
-            <!-- Contact form now posts to a serverless endpoint `/api/send` which sends email via SendGrid. Configure SENDGRID_API_KEY, TO_EMAIL in Vercel project settings. -->
-            <form id="contactForm" style="flex:1;min-width:320px;display:flex;flex-direction:column;gap:8px" action="/api/send" method="POST">
+            <!-- Simple FormSubmit integration: posts directly to FormSubmit so you don't need a server. Replace the email if needed. -->
+            <form id="contactForm" style="flex:1;min-width:320px;display:flex;flex-direction:column;gap:8px" action="https://formsubmit.co/hamzamjid88@gmail.com" method="POST">
               <input name="name" placeholder="Your name" style="padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit" required>
               <input name="email" placeholder="Your email" type="email" style="padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit" required>
               <textarea name="message" rows="4" placeholder="Message" style="padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit" required></textarea>
-              <!-- Optional: redirect to a thank-you page or anchor after submit (handled client-side when posting to /api/send) -->
+              <!-- Optional: redirect to a thank-you page or anchor after submit -->
+              <input type="hidden" name="_next" value="https://protfolio-r25mwlho8-hamza-mjids-projects.vercel.app/#contact">
               <div style="display:flex;gap:8px;justify-content:flex-end">
                 <button class="btn" type="submit">Send</button>
                 <a class="btn ghost" href="/Hamza_CV.pdf" download>Download CV</a>
