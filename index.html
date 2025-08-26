@@ -239,13 +239,12 @@
               <p class="muted">LinkedIn: <a href="#" style="color:var(--accent)">your-linkedin</a></p>
               <p class="muted">GitHub: <a href="#" style="color:var(--accent)">your-github</a></p>
             </div>
-            <!-- Simple FormSubmit integration: posts directly to FormSubmit so you don't need a server. Replace the email if needed. -->
-            <form id="contactForm" style="flex:1;min-width:320px;display:flex;flex-direction:column;gap:8px" action="https://formsubmit.co/hamzamjid88@gmail.com" method="POST">
+            <!-- Contact form posts to the serverless endpoint `/api/send`. This will send emails via SendGrid when SENDGRID_API_KEY is set in Vercel. -->
+            <form id="contactForm" style="flex:1;min-width:320px;display:flex;flex-direction:column;gap:8px" action="/api/send" method="POST">
               <input name="name" placeholder="Your name" style="padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit" required>
               <input name="email" placeholder="Your email" type="email" style="padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit" required>
               <textarea name="message" rows="4" placeholder="Message" style="padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit" required></textarea>
-              <!-- Optional: redirect to a thank-you page or anchor after submit -->
-              <input type="hidden" name="_next" value="https://protfolio-r25mwlho8-hamza-mjids-projects.vercel.app/#contact">
+              <!-- Optional: redirect to a thank-you page or anchor after submit (handled client-side) -->
               <div style="display:flex;gap:8px;justify-content:flex-end">
                 <button class="btn" type="submit">Send</button>
                 <a class="btn ghost" href="/Hamza_CV.pdf" download>Download CV</a>

@@ -90,9 +90,42 @@ if(contactForm){
 
     const isFormSubmit = action.includes('formsubmit.co');
     const isMailto = action.startsWith('mailto:');
+    const isApiSend = action === '/api/send' || action.endsWith('/api/send');
     if(isFormSubmit || isMailto){
       // allow the browser to submit the form normally
       return true;
+    }
+
+    if(isApiSend){
+      // Submit via fetch so we can show friendly feedback without leaving the page
+      e.preventDefault();
+      const formData = new FormData(contactForm);
+      const payload = Object.fromEntries(formData.entries());
+      // basic UI feedback
+      const submitBtn = contactForm.querySelector('button[type="submit"]');
+      const origText = submitBtn ? submitBtn.textContent : '';
+      if(submitBtn) submitBtn.disabled = true, submitBtn.textContent = 'Sending...';
+      fetch(action, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).then(async res => {
+        if(res.ok){
+          if(submitBtn) submitBtn.textContent = 'Sent ✓';
+          contactForm.reset();
+          setTimeout(()=>{ if(submitBtn) submitBtn.textContent = origText, submitBtn.disabled = false; }, 2200);
+        } else {
+          const json = await res.json().catch(()=>null);
+          const text = json && (json.error || json.details) ? JSON.stringify(json) : await res.text().catch(()=>null);
+          alert('Failed to send message. ' + (text || 'Please try again later.'));
+          if(submitBtn) submitBtn.disabled = false, submitBtn.textContent = origText;
+        }
+      }).catch(err => {
+        console.error('send error', err);
+        alert('Failed to send message. Network error.');
+        if(submitBtn) submitBtn.disabled = false, submitBtn.textContent = origText;
+      });
+      return false;
     }
     // otherwise prevent submission and show guidance
     e.preventDefault();
