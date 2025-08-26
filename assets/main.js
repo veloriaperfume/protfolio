@@ -73,12 +73,20 @@ window.addEventListener('keydown', e=>{
   if(e.key==='Escape'){ closeModal(); }
 });
 
-// secure contact form: prevent submission and warn
-const contactForm = document.querySelector('form');
+// contact form handling: allow submission only when action points to a known receiver (FormSubmit) or mailto
+const contactForm = document.getElementById('contactForm');
 if(contactForm){
   contactForm.addEventListener('submit', (e)=>{
+    const action = (contactForm.getAttribute('action') || '').trim();
+    const isFormSubmit = action.includes('formsubmit.co');
+    const isMailto = action.startsWith('mailto:');
+    if(isFormSubmit || isMailto){
+      // allow the browser to submit the form normally
+      return true;
+    }
+    // otherwise prevent submission and show guidance
     e.preventDefault();
-    // client-side: don't send sensitive info anywhere. Show a friendly note.
-    alert('This demo site does not send messages. Replace form action with a secure backend or use mailto: in production.');
+    alert('This demo site will not send messages because no form receiver is configured. To receive emails, replace the form action with a FormSubmit address (https://formsubmit.co/you@example.com) or configure a secure backend.');
+    return false;
   });
 }
