@@ -67,10 +67,37 @@ const modalCloseBtn = document.getElementById('modalClose');
 if(modalCloseBtn) modalCloseBtn.addEventListener('click', closeModal);
 if(modal) modal.addEventListener('click',(e)=>{ if(e.target===e.currentTarget){ closeModal(); } });
 
-// keyboard shortcut
-window.addEventListener('keydown', e=>{
-  if(e.key==='g') location.hash='#contact';
-  if(e.key==='Escape'){ closeModal(); }
+// mobile menu
+const hamburger = document.querySelector('.hamburger');
+const nav = document.querySelector('nav');
+const navLinks = document.querySelectorAll('nav a');
+
+function toggleMenu() {
+  hamburger.classList.toggle('active');
+  nav.classList.toggle('active');
+  document.body.classList.toggle('menu-open');
+}
+
+hamburger.addEventListener('click', toggleMenu);
+
+// Close menu when clicking a link
+navLinks.forEach(link => {
+  link.addEventListener('click', () => {
+    hamburger.classList.remove('active');
+    nav.classList.remove('active');
+    document.body.classList.remove('menu-open');
+  });
+});
+
+// Close menu with Escape key
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    hamburger.classList.remove('active');
+    nav.classList.remove('active');
+    document.body.classList.remove('menu-open');
+    closeModal();
+  }
+  if (e.key === 'g') location.hash = '#contact';
 });
 
 // contact form handling: allow submission only when action points to a known receiver (FormSubmit) or mailto
