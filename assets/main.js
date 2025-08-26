@@ -77,12 +77,54 @@ window.addEventListener('keydown', e=>{
 const contactForm = document.getElementById('contactForm');
 if(contactForm){
   contactForm.addEventListener('submit', (e)=>{
+    // helpful debug info for local testing
     const action = (contactForm.getAttribute('action') || '').trim();
+    console.log('Contact form submit attempt', { action, origin: location.href, protocol: location.protocol, host: location.host });
+
+    // If the page is opened via the file system, block and show a clear message.
+    if(location.protocol === 'file:'){
+      e.preventDefault();
+      alert('FormSubmit will not accept submissions from pages opened with the file:// protocol. Serve the site via a local web server (for example: `python -m http.server 8000`) and open http://localhost:8000');
+      return false;
+    }
+
     const isFormSubmit = action.includes('formsubmit.co');
     const isMailto = action.startsWith('mailto:');
+    const isApiSend = action === '/api/send' || action.endsWith('/api/send');
     if(isFormSubmit || isMailto){
       // allow the browser to submit the form normally
       return true;
+    }
+
+    if(isApiSend){
+      // Submit via fetch so we can show friendly feedback without leaving the page
+      e.preventDefault();
+      const formData = new FormData(contactForm);
+      const payload = Object.fromEntries(formData.entries());
+      // basic UI feedback
+      const submitBtn = contactForm.querySelector('button[type="submit"]');
+      const origText = submitBtn ? submitBtn.textContent : '';
+      if(submitBtn) submitBtn.disabled = true, submitBtn.textContent = 'Sending...';
+      fetch(action, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).then(async res => {
+        if(res.ok){
+          if(submitBtn) submitBtn.textContent = 'Sent ✓';
+          contactForm.reset();
+          setTimeout(()=>{ if(submitBtn) submitBtn.textContent = origText, submitBtn.disabled = false; }, 2200);
+        } else {
+          const text = await res.text().catch(()=>null);
+          alert('Failed to send message. ' + (text || 'Please try again later.'));
+          if(submitBtn) submitBtn.disabled = false, submitBtn.textContent = origText;
+        }
+      }).catch(err => {
+        console.error('send error', err);
+        alert('Failed to send message. Network error.');
+        if(submitBtn) submitBtn.disabled = false, submitBtn.textContent = origText;
+      });
+      return false;
     }
     // otherwise prevent submission and show guidance
     e.preventDefault();
