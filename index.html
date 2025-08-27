@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
   <!-- Security: Content Security Policy for static site (adjust as needed) -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://formsubmit.co; script-src 'self'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; frame-ancestors 'none'; form-action 'self' https://formsubmit.co; base-uri 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://formsubmit.co https://api.staticforms.xyz https://staticforms.xyz; script-src 'self'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; frame-ancestors 'none'; form-action 'self' https://formsubmit.co https://api.staticforms.xyz https://staticforms.xyz; base-uri 'self';">
   <meta name="referrer" content="no-referrer">
     <style>
       :root{
@@ -722,21 +722,91 @@
               <p class="muted">Phone: <a href="tel:+212777741067" style="color:var(--accent)">-212777741067</a></p>
             </div>
             <!-- Contact form posts to the serverless endpoint `/api/send`. This will send emails via SendGrid when SENDGRID_API_KEY is set in Vercel. -->
-            <form action="https://formsubmit.co/hamzamjid88@gmail.com" method="POST" class="contact-form" style="flex:1;min-width:320px;display:flex;flex-direction:column;gap:12px">
-              <div class="input-group">
-                <input type="text" name="name" placeholder="Your name" style="width:100%;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;transition:all 0.3s ease" required>
-              </div>
-              <div class="input-group">
-                <input type="email" name="email" placeholder="Your email" style="width:100%;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;transition:all 0.3s ease" required>
-              </div>
-              <div class="input-group">
-                <textarea name="message" rows="4" placeholder="Message" style="width:100%;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;transition:all 0.3s ease;resize:vertical;min-height:120px" required></textarea>
-              </div>
-              <div style="display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap">
-                <button class="btn" type="submit" style="min-width:120px">Send</button>
-                <a class="btn ghost" href="/hamza-cv.pdf" download style="min-width:120px;text-align:center">Download CV</a>
-              </div>
-            </form>
+            <section class="formcarry-container">
+              <form id="contactForm" class="contact-form" action="https://api.staticforms.xyz/submit" method="POST">
+                <input type="hidden" name="accessKey" value="sf_2j7l5hccji1if7l956ch619l">
+                <input type="hidden" name="subject" value="New Contact from Portfolio">
+                
+                <div class="formcarry-block">
+                  <label for="name" class="muted">Full Name</label>
+                  <input type="text" name="name" id="name" placeholder="Your first and last name" required />
+                </div>
+                
+                <div class="formcarry-block">
+                  <label for="email" class="muted">Your Email Address</label>
+                  <input type="email" name="email" id="email" placeholder="john@doe.com" required />
+                </div>
+                
+                <div class="formcarry-block">
+                  <label for="message" class="muted">Your message</label>
+                  <textarea name="message" id="message" placeholder="Enter your message..." required></textarea>
+                </div>
+
+                <div id="formStatus" style="text-align:center;padding:10px;border-radius:8px;display:none;margin-bottom:10px"></div>
+                
+                <div class="formcarry-block" style="display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap">  
+                  <button type="submit" id="submitButton" class="btn">Send Message</button>
+                  <a class="btn ghost" href="/hamza-cv.pdf" download style="min-width:120px;text-align:center">Download CV</a>
+                </div>
+              </form>
+            </section>
+            <style>
+              .formcarry-container {
+                box-sizing: border-box;
+                width: 100%;
+                color: var(--muted);
+              }
+              
+              .formcarry-container * {
+                box-sizing: border-box;
+              }
+              
+              .formcarry-block {
+                margin-bottom: 16px;
+              }
+              
+              .formcarry-block label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 500;
+              }
+              
+              .formcarry-block input,
+              .formcarry-block textarea {
+                width: 100%;
+                padding: 14px;
+                border-radius: 12px;
+                border: 1px solid rgba(255,255,255,0.04);
+                background: transparent;
+                color: #e6eef6;
+                font-family: inherit;
+                font-size: 14px;
+                transition: all 0.3s ease;
+              }
+              
+              .formcarry-block textarea {
+                min-height: 120px;
+                resize: vertical;
+              }
+              
+              .formcarry-block input:hover,
+              .formcarry-block textarea:hover {
+                border-color: rgba(255,255,255,0.1);
+              }
+              
+              .formcarry-block input:focus,
+              .formcarry-block textarea:focus {
+                outline: none;
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(0,255,225,0.1);
+              }
+              
+              .formcarry-block input::placeholder,
+              .formcarry-block textarea::placeholder {
+                color: var(--muted);
+                opacity: 0.6;
+              }
+            </style>
           </div>
         </section>
 
@@ -760,5 +830,6 @@
     </div>
 
   <script src="assets/main.js" defer></script>
+  <!-- contact form is handled natively (posts to StaticForms). JS in assets/main.js will allow native submit; removed broken inline fetch handler. -->
   </body>
 </html>

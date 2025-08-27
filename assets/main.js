@@ -100,63 +100,74 @@ window.addEventListener('keydown', e => {
   if (e.key === 'g') location.hash = '#contact';
 });
 
-// contact form handling: allow submission only when action points to a known receiver (FormSubmit) or mailto
+// contact form handling: allow submission for known receivers (FormSubmit, mailto), handle /api/send via fetch,
+// and support StaticForms (accessKey) by posting JSON to the StaticForms endpoint.
 const contactForm = document.getElementById('contactForm');
-if(contactForm){
-  contactForm.addEventListener('submit', (e)=>{
+if (contactForm) {
+  contactForm.addEventListener('submit', (e) => {
     // helpful debug info for local testing
     const action = (contactForm.getAttribute('action') || '').trim();
     console.log('Contact form submit attempt', { action, origin: location.href, protocol: location.protocol, host: location.host });
 
     // If the page is opened via the file system, block and show a clear message.
-    if(location.protocol === 'file:'){
+    if (location.protocol === 'file:') {
       e.preventDefault();
-      alert('FormSubmit will not accept submissions from pages opened with the file:// protocol. Serve the site via a local web server (for example: `python -m http.server 8000`) and open http://localhost:8000');
+      alert('Form endpoints will not accept submissions from pages opened with the file:// protocol. Serve the site via a local web server (for example: `python -m http.server 8000`) and open http://localhost:8000');
       return false;
     }
 
     const isFormSubmit = action.includes('formsubmit.co');
     const isMailto = action.startsWith('mailto:');
     const isApiSend = action === '/api/send' || action.endsWith('/api/send');
-    if(isFormSubmit || isMailto){
-      // allow the browser to submit the form normally
+  const isFormcarry = action.includes('formcarry.com');
+  const isUseBasin = action.includes('usebasin.com') || action.includes('usebasin');
+  const isStaticForms = action.includes('staticforms.xyz') || !!contactForm.querySelector('input[name="accessKey"]');
+
+    // Allow native submit for FormSubmit, mailto, staticforms, formcarry/basin endpoints
+    if (isFormSubmit || isMailto || isFormcarry || isUseBasin || isStaticForms) {
       return true;
     }
 
-    if(isApiSend){
-      // Submit via fetch so we can show friendly feedback without leaving the page
+    // If the site's own API is configured, submit via fetch so we can show friendly feedback
+    if (isApiSend) {
       e.preventDefault();
       const formData = new FormData(contactForm);
       const payload = Object.fromEntries(formData.entries());
-      // basic UI feedback
       const submitBtn = contactForm.querySelector('button[type="submit"]');
       const origText = submitBtn ? submitBtn.textContent : '';
-      if(submitBtn) submitBtn.disabled = true, submitBtn.textContent = 'Sending...';
+      if (submitBtn) submitBtn.disabled = true, submitBtn.textContent = 'Sending...';
       fetch(action, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       }).then(async res => {
-        if(res.ok){
-          if(submitBtn) submitBtn.textContent = 'Sent ✓';
+        if (res.ok) {
+          if (submitBtn) submitBtn.textContent = 'Sent ✓';
           contactForm.reset();
-          setTimeout(()=>{ if(submitBtn) submitBtn.textContent = origText, submitBtn.disabled = false; }, 2200);
+          setTimeout(() => { if (submitBtn) submitBtn.textContent = origText, submitBtn.disabled = false; }, 2200);
         } else {
-          const json = await res.json().catch(()=>null);
-          const text = json && (json.error || json.details) ? JSON.stringify(json) : await res.text().catch(()=>null);
+          const json = await res.json().catch(() => null);
+          const text = json && (json.error || json.details) ? JSON.stringify(json) : await res.text().catch(() => null);
           alert('Failed to send message. ' + (text || 'Please try again later.'));
-          if(submitBtn) submitBtn.disabled = false, submitBtn.textContent = origText;
+          if (submitBtn) submitBtn.disabled = false, submitBtn.textContent = origText;
         }
       }).catch(err => {
         console.error('send error', err);
         alert('Failed to send message. Network error.');
-        if(submitBtn) submitBtn.disabled = false, submitBtn.textContent = origText;
+        if (submitBtn) submitBtn.disabled = false, submitBtn.textContent = origText;
       });
       return false;
     }
+
+    // If a StaticForms accessKey is present (or the action points to staticforms), allow native form POST
+    if (isStaticForms) {
+      // Let the browser perform a native form POST to StaticForms to avoid CORS/preflight issues.
+      return true;
+    }
+
     // otherwise prevent submission and show guidance
     e.preventDefault();
-    alert('This demo site will not send messages because no form receiver is configured. To receive emails, replace the form action with a FormSubmit address (https://formsubmit.co/you@example.com) or configure a secure backend.');
+    alert('This demo site will not send messages because no form receiver is configured. To receive emails, configure a backend or set a supported third-party form endpoint.');
     return false;
   });
 }
