@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
   <!-- Security: Content Security Policy for static site (adjust as needed) -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://formsubmit.co https://api.staticforms.xyz https://staticforms.xyz; script-src 'self'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; frame-ancestors 'none'; form-action 'self' https://formsubmit.co https://api.staticforms.xyz https://staticforms.xyz; base-uri 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://formsubmit.co https://api.staticforms.xyz https://staticforms.xyz; script-src 'self'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; frame-ancestors 'none'; frame-src 'self' https://api.staticforms.xyz; form-action 'self' https://formsubmit.co https://api.staticforms.xyz https://staticforms.xyz; base-uri 'self';">
   <meta name="referrer" content="no-referrer">
     <style>
       :root{
@@ -723,7 +723,7 @@
             </div>
             <!-- Contact form posts to the serverless endpoint `/api/send`. This will send emails via SendGrid when SENDGRID_API_KEY is set in Vercel. -->
             <section class="formcarry-container">
-              <form id="contactForm" class="contact-form" action="https://api.staticforms.xyz/submit" method="POST">
+              <form id="contactForm" class="contact-form" action="https://api.staticforms.xyz/submit" method="POST" target="form-target">
                 <input type="hidden" name="accessKey" value="sf_2j7l5hccji1if7l956ch619l">
                 <input type="hidden" name="subject" value="New Contact from Portfolio">
                 
@@ -749,6 +749,23 @@
                   <a class="btn ghost" href="/hamza-cv.pdf" download style="min-width:120px;text-align:center">Download CV</a>
                 </div>
               </form>
+                <!-- hidden iframe target for native form POST to avoid page navigation and enable redirect on success -->
+                <iframe name="form-target" id="form-target" style="display:none" aria-hidden="true"></iframe>
+                <script>
+                  // When the iframe loads after a form POST, redirect the parent to a success page.
+                  const iframe = document.getElementById('form-target');
+                  if (iframe) {
+                    iframe.addEventListener('load', function() {
+                      try {
+                        // staticforms responds with a redirect or simple response; always navigate to success page after load
+                        window.location.href = '/success.html';
+                      } catch (e) {
+                        // fallback: still navigate to success
+                        window.location.href = '/success.html';
+                      }
+                    });
+                  }
+                </script>
             </section>
             <style>
               .formcarry-container {
